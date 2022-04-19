@@ -29,7 +29,7 @@ The code is in the file: thing.ts.
 If you want to execute code here, you can do so with [Deno](https://deno.land/).
 It helps to also install the Deno plugin, if you are using Visual Studio Code.
 ```
-deno run thing.ts
+deno run --allow-all thing.ts
 // methodOne
 // methodTwo
 ```
@@ -40,3 +40,11 @@ Just calling methods is nice, but what about state?
 We can use the class instance to hold state.
 
 Check thing.ts to see how.
+
+## Part 3: `then`
+
+Okay, we have a fluent api that can add a number to the instance. But what if we would like our calculator to also include the current weather? I mean, calculators can be very boring.
+
+Now we are adding async methods to the calculator.
+
+And unfortunatly we end up with a little problem, we have a promise result that we want to chain.
