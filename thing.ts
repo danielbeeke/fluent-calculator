@@ -1,23 +1,31 @@
 /**
- * The important part for fluent API's is that we return the class instance from every method.
- * You will see that TypeScript also works fine.
+ * Renamed to calculator, cleaned things up a bit and added state to the class.
  */
-class Thing {
+class Calculator {
 
-  methodOne () {
-    console.log('methodOne')
+  // A private place to keep our value.
+  // We start with zero.
+  #value: number = 0
+
+  /**
+   * The add method, this mutates the state and just like before we return the instance.
+   */
+  add (amount: number) {
+    this.#value += amount
     return this
   }
 
-  methodTwo () {
-    console.log('methodTwo')
-    return this
+  /**
+   * When our state is private there is no way to get it out.
+   * For now we have made this method to return the current value.
+   */
+  value () {
+    return this.#value
   }
-
 }
 
-const myThing = new Thing()
+const myCalculator = new Calculator()
 
-myThing.methodOne().methodTwo()
-// methodOne
-// methodTwo
+const value = myCalculator.add(7).add(-3).value()
+console.log(value)
+// 4

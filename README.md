@@ -10,6 +10,7 @@ We will discuss the following topics:
 - A chain of methods
 - Holding state
 - `then`
+- Making a queue instead of direct mutating.
 - And possibly more
 
 ## Part 1: A chain of methods
@@ -32,3 +33,10 @@ deno run thing.ts
 // methodOne
 // methodTwo
 ```
+
+## Part 2: Holding state
+
+Just calling methods is nice, but what about state?
+We can use the class instance to hold state.
+
+Check thing.ts to see how.
