@@ -1,7 +1,7 @@
 # Fluent Calculator
 
 This fluent calculator is an example demonstrating fluent APIs.
-It is part of a presentation explaining how to make your own fluent API.
+It is part of a [presentation](https://danielbeeke.nl/fluent-apis/) explaining how to make your own fluent API.
 
 You can go through the git commits to learn how to make your own fluent API.
 
@@ -62,3 +62,20 @@ All calculations are put into anonymous functions that are put into an array to 
 When the programmer is using `await thing.method()` it is just doing `thing.method().then()`.
 So the cool thing is, the `then` is our signal that we should return a value and thus start executing our queue functions.
 To act like a promise or thenable we should have a then method that accepts a callback and we should call execute callback (resolve).
+
+## Final result
+
+```JavaScript
+const myCalculator = new Calculator()
+
+const valueResolved = await myCalculator
+  .addCurrentTemperature('Vienna')
+  .add(7)
+  .multiply(2)
+  .addCurrentTemperature('Berlin')
+  .add(3)
+
+console.log(valueResolved)
+// I would not know the outcome when you look but today it is 37.
+
+```

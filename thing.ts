@@ -1,5 +1,29 @@
 /**
- * Renamed to calculator, cleaned things up a bit and added state to the class.
+ * Returns latitude and longitude for a city.
+ * @param city 
+ * @returns 
+ */
+const getLatLOnByCityName = async (city: string) => {
+  const geocodingUrl = `https://nominatim.openstreetmap.org/search?q=${city}&format=json`
+  const geocodingResponse = await fetch(geocodingUrl)
+  const geocodingData = await geocodingResponse.json()
+  const { lat, lon } = geocodingData[0]
+  return { lat, lon }
+}
+
+/**
+ * Returns the temperature when given a latitude and longitude.
+ */
+const getTemperatureByLatLon = async (lat: number, lon: number) => {
+  const weatherUrl = `https://www.7timer.info/bin/astro.php?lon=${lon}&lat=${lat}&ac=0&unit=metric&output=json&tzshift=0`
+  const weatherResponse = await fetch(weatherUrl)
+  const weatherData = await weatherResponse.json()
+  return weatherData.dataseries[0].temp2m
+}
+
+/**
+ * A calculator that some how also can add the temperature of a city to a calculation.
+ * Just a bit of fun to demonstrate how to create a async fluent API.
  */
 class Calculator {
 
@@ -16,16 +40,13 @@ class Calculator {
   }
 
   /**
-   * We have renamed the method value to then.
-   * Our class will act like a Promise.
+   * The multiply method, 
+   * Instead of mutating state, it adds a queue item
+   * and just like before we return the instance.
    */
-  async then (resolve: (result: number) => void) {
-    let value = 0
-
-    for (const queueCallback of this.#queue)
-      value = await queueCallback(value)
-
-    resolve(value)
+   multiply (amount: number) {
+    this.#queue.push((currentValue: number) => currentValue *= amount)
+    return this
   }
 
   /**
@@ -37,31 +58,37 @@ class Calculator {
    */
   addCurrentTemperature (city: string) {
     this.#queue.push(async (currentValue: number) => {
-      // First we get the location of the given city.
-      const geocodingUrl = `https://nominatim.openstreetmap.org/search?q=${city}&format=json`
-      const geocodingResponse = await fetch(geocodingUrl)
-      const geocodingData = await geocodingResponse.json()
-      const { lat, lon } = geocodingData[0]
-
-      // Here we get the temperature.
-      const weatherUrl = `https://www.7timer.info/bin/astro.php?lon=${lon}&lat=${lat}&ac=0&unit=metric&output=json&tzshift=0`
-      const weatherResponse = await fetch(weatherUrl)
-      const weatherData = await weatherResponse.json()
-      const temperature = weatherData.dataseries[0].temp2m
-
+      const { lat, lon } = await getLatLOnByCityName(city)
+      const temperature = await getTemperatureByLatLon(lat, lon)
       return currentValue + temperature
     })
 
     // As always we return the instance.
     return this
   }
+
+  /**
+   * We have renamed the method value to then.
+   * Our class will act like a Promise.
+   */
+   async then (resolve: (result: number) => void) {
+    let value = 0
+
+    for (const queueCallback of this.#queue)
+      value = await queueCallback(value)
+
+    resolve(value)
+  }
+
 }
 
 const myCalculator = new Calculator()
-const value = myCalculator.addCurrentTemperature('Vienna').add(7)
-console.log(value)
-// Calculator {}  Will give our Calculator instance.
 
-// But now:
-const valueResolved = await myCalculator.addCurrentTemperature('Vienna').add(7)
+const valueResolved = await myCalculator
+  .addCurrentTemperature('Vienna')
+  .add(7)
+  .multiply(2)
+  .addCurrentTemperature('Berlin')
+  .add(3)
+
 console.log(valueResolved)
