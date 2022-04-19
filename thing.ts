@@ -3,24 +3,29 @@
  */
 class Calculator {
 
-  // A private place to keep our value.
-  // We start with zero.
-  #value: number = 0
+  #queue: Array<(currentValue: number) => number | Promise<number>> = [] 
 
   /**
-   * The add method, this mutates the state and just like before we return the instance.
+   * The add method, 
+   * Instead of mutating state, it adds a queue item
+   * and just like before we return the instance.
    */
   add (amount: number) {
-    this.#value += amount
+    this.#queue.push((currentValue: number) => currentValue += amount)
     return this
   }
 
   /**
-   * When our state is private there is no way to get it out.
-   * For now we have made this method to return the current value.
+   * We have renamed the method value to then.
+   * Our class will act like a Promise.
    */
-  value () {
-    return this.#value
+  async then (resolve: (result: number) => void) {
+    let value = 0
+
+    for (const queueCallback of this.#queue)
+      value = await queueCallback(value)
+
+    resolve(value)
   }
 
   /**
@@ -30,27 +35,33 @@ class Calculator {
    * So we are going to fetch the current weather for the given city.
    * First we get the latitude and the longitude and the nthe weather.
    */
-  async addCurrentTemperature (city: string) {
-    // First we get the location of the given city.
-    const geocodingUrl = `https://nominatim.openstreetmap.org/search?q=${city}&format=json`
-    const geocodingResponse = await fetch(geocodingUrl)
-    const geocodingData = await geocodingResponse.json()
-    const { lat, lon } = geocodingData[0]
+  addCurrentTemperature (city: string) {
+    this.#queue.push(async (currentValue: number) => {
+      // First we get the location of the given city.
+      const geocodingUrl = `https://nominatim.openstreetmap.org/search?q=${city}&format=json`
+      const geocodingResponse = await fetch(geocodingUrl)
+      const geocodingData = await geocodingResponse.json()
+      const { lat, lon } = geocodingData[0]
 
-    const weatherUrl = `https://www.7timer.info/bin/astro.php?lon=${lon}&lat=${lat}&ac=0&unit=metric&output=json&tzshift=0`
-    const weatherResponse = await fetch(weatherUrl)
-    const weatherData = await weatherResponse.json()
-    const temperature = weatherData.dataseries[0].temp2m
-    console.log(temperature)
+      // Here we get the temperature.
+      const weatherUrl = `https://www.7timer.info/bin/astro.php?lon=${lon}&lat=${lat}&ac=0&unit=metric&output=json&tzshift=0`
+      const weatherResponse = await fetch(weatherUrl)
+      const weatherData = await weatherResponse.json()
+      const temperature = weatherData.dataseries[0].temp2m
+
+      return currentValue + temperature
+    })
+
+    // As always we return the instance.
+    return this
   }
 }
 
 const myCalculator = new Calculator()
-const value = await myCalculator.addCurrentTemperature('Vienna')
+const value = myCalculator.addCurrentTemperature('Vienna').add(7)
 console.log(value)
-// 5 or some other temperature.
+// Calculator {}  Will give our Calculator instance.
 
-/**
- * PS. as you see we are using await here. It might be hard to still chain things.
- * Promises return .then, .catch and .finally instead of our awesome methods.
- */
+// But now:
+const valueResolved = await myCalculator.addCurrentTemperature('Vienna').add(7)
+console.log(valueResolved)

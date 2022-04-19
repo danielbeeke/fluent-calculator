@@ -48,3 +48,17 @@ Okay, we have a fluent api that can add a number to the instance. But what if we
 Now we are adding async methods to the calculator.
 
 And unfortunatly we end up with a little problem, we have a promise result that we want to chain.
+
+## Part 4: Making a queue instead of direct mutating
+
+So last part we saw how we can prepare to get asynchronous data. But it gave us a promise.
+Instead of getting data immediately we will make a queue.
+And then execute that queue with `then`.
+
+Lets check thing.ts!
+
+The main thing we are doing now is shifting the execution to the end.
+All calculations are put into anonymous functions that are put into an array to be executed later.
+When the programmer is using `await thing.method()` it is just doing `thing.method().then()`.
+So the cool thing is, the `then` is our signal that we should return a value and thus start executing our queue functions.
+To act like a promise or thenable we should have a then method that accepts a callback and we should call execute callback (resolve).
