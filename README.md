@@ -1,7 +1,7 @@
 # Fluent Calculator
 
 This fluent calculator is an example demonstrating fluent APIs.
-It is part of a [presentation](https://danielbeeke.nl/fluent-apis/) explaining how to make your own fluent API.
+It is part of a [presentation](https://danielbeeke.nl/fluent-interfaces/) explaining how to make your own fluent API.
 
 You can go through the git commits to learn how to make your own fluent API.
 
